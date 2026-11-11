@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservierung – Alte Scheune</title>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="left-nav">
+      <a href="index.html" class="logo"><img src="Logo.jpeg" alt="Logo Alte Scheune"></a>
+      <div class="logo-text">Alte Scheune</div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="impressum.html">Impressum</a></li>
+      <li><a href="datenschutz.html">Datenschutzerklärung</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="sidebar"></div>
+
+<section class="reservation-section">
+  <h1 class="reservation-title">Reservierung</h1>
+
+  <form id="reservationForm">
+
+    <label>Name *</label>
+    <input type="text" id="name" required>
+
+    <label>E-Mail *</label>
+    <input type="email" id="email" required>
+
+    <label for="date">Datum auswählen *</label>
+	<div id="datePickerContainer">
+		<input id="dateInput" type="text" placeholder="Datum wählen…" readonly>
+		<div id="datePicker"></div>
+	</div>
+
+
+	<label for="timeInput">Uhrzeit auswählen *</label>
+<div class="time-picker-wrapper">
+    <input type="text" id="timeInput" placeholder="--:--" readonly>
+
+    <div class="time-picker-dropdown" id="timePicker">
+        <div class="time-column" id="hoursColumn"></div>
+        <div class="time-column" id="minutesColumn"></div>
+    </div>
+</div>
+
+
+
+    <label>Personen *</label>
+    <input type="number" id="persons" min="1" max="50" required>
+
+    <label>Nachricht (optional)</label>
+    <textarea id="message"></textarea>
+
+    <button type="submit" id="submitBtn">Reservierung abschicken</button>
+
+  </form>
+
+</section>
+
+<script src="reservation.js"></script>
+
+<script>
+const dateInput = document.getElementById("dateInput");
+const datePicker = document.getElementById("datePicker");
+
+let current = new Date();
+
+function buildCalendar(year, month) {
+    datePicker.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "dp-header";
+
+    const prev = document.createElement("span");
+    prev.className = "dp-nav-btn";
+    prev.textContent = "◀";
+    prev.onclick = () => changeMonth(-1);
+
+    const next = document.createElement("span");
+    next.className = "dp-nav-btn";
+    next.textContent = "▶";
+    next.onclick = () => changeMonth(1);
+
+    const title = document.createElement("span");
+    title.textContent = `${monthName(month)} ${year}`;
+
+    header.append(prev, title, next);
+    datePicker.append(header);
+
+    const grid = document.createElement("div");
+    grid.className = "dp-grid";
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
+        grid.append(document.createElement("span"));
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const day = document.createElement("div");
+        day.className = "dp-day";
+        day.textContent = d;
+        day.onclick = () => selectDate(year, month, d);
+        grid.append(day);
+    }
+
+    datePicker.append(grid);
+}
+
+function monthName(m) {
+    return ["Januar", "Februar", "März", "April", "Mai", "Juni",
+            "Juli", "August", "September", "Oktober", "November", "Dezember"][m];
+}
+
+function changeMonth(step) {
+    current.setMonth(current.getMonth() + step);
+    buildCalendar(current.getFullYear(), current.getMonth());
+}
+
+function selectDate(year, month, day) {
+    const formatted = `${day}.${month + 1}.${year}`;
+    dateInput.value = formatted;
+    datePicker.style.display = "none";
+}
+
+dateInput.onclick = () => {
+    datePicker.style.display = datePicker.style.display === "block" ? "none" : "block";
+};
+
+buildCalendar(current.getFullYear(), current.getMonth());
+</script>
+
+<script>
+const timeInput = document.getElementById("timeInput");
+const timePicker = document.getElementById("timePicker");
+const hoursColumn = document.getElementById("hoursColumn");
+const minutesColumn = document.getElementById("minutesColumn");
+
+// Stunden hinzufügen (11–23)
+for (let h = 11; h < 23; h++) {
+    let div = document.createElement("div");
+    div.textContent = h.toString().padStart(2, "0");
+    div.addEventListener("click", () => selectHour(div.textContent));
+    hoursColumn.appendChild(div);
+}
+
+// Minuten hinzufügen
+for (let m = 0; m < 60; m += 5) {
+    let div = document.createElement("div");
+    div.textContent = m.toString().padStart(2, "0");
+    div.addEventListener("click", () => selectMinute(div.textContent));
+    minutesColumn.appendChild(div);
+}
+
+let selectedHour = null;
+let selectedMinute = null;
+
+// Öffnen
+timeInput.addEventListener("click", () => {
+    timePicker.style.display = "flex";
+});
+
+// Stunde wählen
+function selectHour(h) {
+    selectedHour = h;
+    updateTime();
+}
+
+// Minute wählen
+function selectMinute(m) {
+    selectedMinute = m;
+    updateTime();
+}
+
+// Zeit zusammensetzen
+function updateTime() {
+    if (selectedHour !== null && selectedMinute !== null) {
+        timeInput.value = `${selectedHour}:${selectedMinute}`;
+        timePicker.style.display = "none";
+    }
+}
+
+document.addEventListener("click", function(e) {
+    if (!timePicker.contains(e.target) && e.target !== timeInput) {
+        timePicker.style.display = "none";
+    }
+});
+</script>
+
+
+</body>
+</html>
